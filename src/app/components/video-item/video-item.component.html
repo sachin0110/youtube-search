@@ -1,0 +1,13 @@
+<div class="video">
+  <youtube-player [videoId]="video.id.videoId" suggestedQuality="small"> </youtube-player>
+  <h3>{{ video.snippet.title }}</h3>
+  <div class="video-info">
+    <span class="channel-title">
+      <a [href]="'https://www.youtube.com/@' + getChannelId(video.snippet.channelTitle)" target="_blank" rel="noopener noreferrer">
+        {{ video.snippet.channelTitle }} 
+      </a>
+    </span> 
+    <span>|</span>
+    <span class="publish-date">{{ video.snippet.publishedAt | date }}</span>
+  </div>
+</div>

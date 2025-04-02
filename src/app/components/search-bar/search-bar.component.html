@@ -1,0 +1,25 @@
+<div class="search-container">
+  <div class="search-input-wrapper">
+    <div class="input-container">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Search videos..."
+        (keydown.enter)="onSearch()"
+        class="search-input"
+      />
+      <button
+        *ngIf="searchTerm"
+        (click)="clearSearch()"
+        class="clear-button"
+        title="Clear search"
+      >
+        ✕
+      </button>
+    </div>
+    <button (click)="onSearch()" class="search-button">
+      <img src="assets/search-icon.svg" alt="Search" class="search-icon">
+      Search
+    </button>
+  </div>
+</div>
