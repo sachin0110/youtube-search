@@ -10,7 +10,15 @@
     "test:coverage": "ng test --code-coverage",
     "test:watch": "ng test --watch",
     "test:ci": "ng test --browsers=ChromeHeadless --watch=false",
-    "check": "ng build && ng test && ng serve"
+    "check": "ng build && ng test && ng serve",
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
+    "release:patch": "standard-version --release-as patch",
+    "release:alpha": "standard-version --prerelease alpha",
+    "release:beta": "standard-version --prerelease beta",
+    "release:rc": "standard-version --prerelease rc",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
   },
   "private": true,
   "dependencies": {
@@ -37,6 +45,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "standard-version": "^9.5.0",
     "typescript": "~5.7.2"
   }
 }
