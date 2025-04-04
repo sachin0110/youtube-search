@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { YouTubePlayer } from '@angular/youtube-player';
-import { DatePipe } from '@angular/common';
+import { DateCustomPipe } from '../../pages/pipes/custom-date.pipe';
 
 @Component({
   selector: 'app-video-item',
   templateUrl: './video-item.component.html',
-  imports: [YouTubePlayer, DatePipe],
+  imports: [YouTubePlayer, DateCustomPipe],
   styleUrls: ['./video-item.component.css'],
 })
 export class VideoItemComponent {

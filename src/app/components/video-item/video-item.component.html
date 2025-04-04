@@ -8,6 +8,6 @@
       </a>
     </span> 
     <span>|</span>
-    <span class="publish-date">{{ video.snippet.publishedAt | date }}</span>
+    <span class="publish-date">{{ video.snippet.publishedAt | dateCustom: "d/mmm/yy" }}</span>
   </div>
 </div>
