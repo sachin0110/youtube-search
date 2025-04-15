@@ -1,10 +1,32 @@
-import { Component, Input, OnInit, HostListener } from '@angular/core';
-import { YoutubeApiService } from '../../services/youtube-api.service';
+import { Component, Input, OnInit, HostListener, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { VideoItemComponent } from '../video-item/video-item.component';
-import { catchError, finalize, retry } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import {
+  catchError,
+  debounceTime,
+  finalize,
+  map,
+  retry,
+  startWith,
+  switchMap,
+  take,
+  tap,
+} from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  of,
+  merge,
+  interval,
+  fromEvent,
+  Observable,
+  Subject,
+  BehaviorSubject,
+  zip,
+} from 'rxjs';
+import { YoutubeApiService } from '../../services/youtube-api.service';
+import { VideoItemComponent } from '../video-item/video-item.component';
+
+import { SharedService } from '../../services/shared.service';
 
 interface ErrorState {
   message: string;
@@ -17,11 +39,15 @@ interface ErrorState {
   standalone: true, //  Standalone component
   imports: [CommonModule, VideoItemComponent], //  Import required modules
   templateUrl: './video-list.component.html',
-  styleUrls: ['./video-list.component.css']
+  styleUrls: ['./video-list.component.css'],
 })
 export class VideoListComponent implements OnInit {
   @Input() searchTerm!: string;
   @Input() videos: any[] = [];
+  counter$ = interval(1000);
+  // Convert to Signal
+  counterSignal = toSignal(this.counter$, { initialValue: 0 });
+
   nextPageToken: string = '';
   loading = false;
   error: ErrorState | null = null;
@@ -29,7 +55,15 @@ export class VideoListComponent implements OnInit {
   retryCount = 0;
   maxRetries = 3;
 
-  constructor(private youtubeService: YoutubeApiService) {}
+  constructor(
+    private youtubeService: YoutubeApiService,
+    protected sharedService: SharedService
+  ) {
+    // You can also watch it reactively using an effect
+    // effect(() => {
+    //   console.log('Signal value:', this.counterSignal());
+    // });
+  }
 
   ngOnChanges() {
     if (this.searchTerm) {
@@ -39,6 +73,7 @@ export class VideoListComponent implements OnInit {
   }
 
   ngOnInit() {
+    // this.testRxjsOperators();
     if (this.searchTerm) {
       this.loadVideos();
     }
@@ -48,12 +83,17 @@ export class VideoListComponent implements OnInit {
       const options = {
         root: null,
         rootMargin: '0px',
-        threshold: 0.1
+        threshold: 0.1,
       };
 
       const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && !this.loading && this.hasMoreVideos && !this.error) {
+        entries.forEach((entry) => {
+          if (
+            entry.isIntersecting &&
+            !this.loading &&
+            this.hasMoreVideos &&
+            !this.error
+          ) {
             this.loadVideos();
           }
         });
@@ -80,19 +120,22 @@ export class VideoListComponent implements OnInit {
     if (error instanceof ErrorEvent) {
       return {
         type: 'network',
-        message: 'Unable to connect to the server. Please check your internet connection.',
-        retryable: true
+        message:
+          'Unable to connect to the server. Please check your internet connection.',
+        retryable: true,
       };
     }
 
     // Handle quota exceeded error
-    if (error?.error?.error?.message === 'quotaExceeded' || 
-        error?.error?.message === 'quotaExceeded' ||
-        error?.message === 'quotaExceeded') {
+    if (
+      error?.error?.error?.message === 'quotaExceeded' ||
+      error?.error?.message === 'quotaExceeded' ||
+      error?.message === 'quotaExceeded'
+    ) {
       return {
         type: 'quota',
         message: 'Daily API quota exceeded. Please try again tomorrow.',
-        retryable: false
+        retryable: false,
       };
     }
 
@@ -101,7 +144,7 @@ export class VideoListComponent implements OnInit {
       return {
         type: 'rate-limit',
         message: 'Too many requests. Please wait a moment before trying again.',
-        retryable: true
+        retryable: true,
       };
     }
 
@@ -109,8 +152,9 @@ export class VideoListComponent implements OnInit {
     if (error?.status >= 400 && error?.status < 500) {
       return {
         type: 'api',
-        message: error?.error?.message || 'An API error occurred. Please try again.',
-        retryable: true
+        message:
+          error?.error?.message || 'An API error occurred. Please try again.',
+        retryable: true,
       };
     }
 
@@ -119,7 +163,7 @@ export class VideoListComponent implements OnInit {
       return {
         type: 'server',
         message: 'Server error. Please try again later.',
-        retryable: true
+        retryable: true,
       };
     }
 
@@ -127,17 +171,24 @@ export class VideoListComponent implements OnInit {
     return {
       type: 'generic',
       message: 'An unexpected error occurred. Please try again.',
-      retryable: true
+      retryable: true,
     };
+  }
+
+  testRxjsOperators() {
+    fromEvent(document, 'keyup')
+      .pipe(debounceTime(2000))
+      .subscribe(() => console.log('Stopped typing'));
   }
 
   loadVideos() {
     if (!this.searchTerm || this.loading || !this.hasMoreVideos) return;
-    
+
     this.loading = true;
     this.error = null;
 
-    this.youtubeService.searchVideos(this.searchTerm, this.nextPageToken)
+    this.youtubeService
+      .searchVideos(this.searchTerm, this.nextPageToken)
       .pipe(
         retry({
           count: this.maxRetries,
@@ -150,9 +201,9 @@ export class VideoListComponent implements OnInit {
               }
             }
             return of(0);
-          }
+          },
         }),
-        catchError(error => {
+        catchError((error) => {
           this.error = this.handleError(error);
           return of({ items: [], nextPageToken: '' });
         }),
@@ -161,22 +212,27 @@ export class VideoListComponent implements OnInit {
           this.retryCount = 0;
         })
       )
-      .subscribe(data => {
+      .subscribe((data) => {
         if (data.error) {
           this.error = this.handleError(data.error);
           return;
         }
-        
+
         this.videos = [...this.videos, ...data.items];
         this.nextPageToken = data.nextPageToken || '';
         this.hasMoreVideos = !!data.nextPageToken;
       });
   }
 
+  ngOnDestroy() {}
+
   @HostListener('window:scroll', [])
   onScroll() {
     // Cross-browser compatible way to detect scroll position
-    const windowHeight = 'innerHeight' in window ? window.innerHeight : document.documentElement.offsetHeight;
+    const windowHeight =
+      'innerHeight' in window
+        ? window.innerHeight
+        : document.documentElement.offsetHeight;
     const body = document.body;
     const html = document.documentElement;
     const docHeight = Math.max(
@@ -187,11 +243,13 @@ export class VideoListComponent implements OnInit {
       html.offsetHeight
     );
     const windowBottom = windowHeight + window.pageYOffset;
-    
-    if ((windowBottom >= docHeight - 100) && 
-        !this.loading && 
-        this.hasMoreVideos && 
-        !this.error) {
+
+    if (
+      windowBottom >= docHeight - 100 &&
+      !this.loading &&
+      this.hasMoreVideos &&
+      !this.error
+    ) {
       this.loadVideos();
     }
   }
@@ -204,8 +262,10 @@ export class VideoListComponent implements OnInit {
 
   // Add a method to check if the browser supports IntersectionObserver
   private supportsIntersectionObserver(): boolean {
-    return 'IntersectionObserver' in window &&
-           'IntersectionObserverEntry' in window &&
-           'intersectionRatio' in window.IntersectionObserverEntry.prototype;
+    return (
+      'IntersectionObserver' in window &&
+      'IntersectionObserverEntry' in window &&
+      'intersectionRatio' in window.IntersectionObserverEntry.prototype
+    );
   }
 }

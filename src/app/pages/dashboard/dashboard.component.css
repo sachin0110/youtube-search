@@ -1,0 +1,32 @@
+
+.app-container {
+  width: 95vw;
+  background: #fff;
+  padding: 5px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+h1 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+
+@media (max-width: 768px) {
+  .app-container {
+    width: 95vw;
+    padding: 15px;
+  }
+
+  input[type="text"] {
+    width: 70%;
+    font-size: 14px;
+  }
+
+  button {
+    font-size: 14px;
+    padding: 10px 15px;
+  }
+}

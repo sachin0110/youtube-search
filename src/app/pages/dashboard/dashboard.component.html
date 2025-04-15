@@ -1,0 +1,7 @@
+<app-header></app-header>
+<!-- <app-navbar></app-navbar> -->
+<div class="app-container">
+    <app-search-bar (search)="searchVideos($event)"></app-search-bar>
+    <app-video-list [searchTerm]="searchTerm"></app-video-list>
+</div>
+<app-footer></app-footer>
