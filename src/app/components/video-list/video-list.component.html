@@ -13,8 +13,11 @@
       Try Again
     </button>
   </div>
-
+    @if (videos.length>0){
+      <p>Showing videos for: {{ sharedService.sharedSignal() }}</p>
+    }
   <div class="video-list">
+
     <div *ngFor="let video of videos" class="video-item">
       <app-video-item [video]="video"></app-video-item>
     </div>

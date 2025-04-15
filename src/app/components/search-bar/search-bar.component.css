@@ -2,10 +2,10 @@
   display: block;
   width: 100%;
   background: linear-gradient(135deg, #1795d4 0%, #1576aa 100%);
-  padding: 20px 0;
+  padding: 7px 0;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1;
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -56,8 +56,8 @@
 
 .clear-button {
   position: absolute;
-  right: 12px;
-  top: 50%;
+  right: 10px;
+  top: 45%;
   transform: translateY(-50%);
   width: 24px;
   height: 24px;
@@ -87,7 +87,7 @@
   color: #1795d4;
   border: none;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -100,6 +100,22 @@
   background-color: rgba(255, 255, 255, 0.9);
   transform: translateY(-1px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+
+ul {
+  border: 1px solid #606c81;
+  position: absolute;
+  list-style-type: none;
+  padding: 5px;
+  background: #606c81;
+  border-radius: 5px;
+  color: white;
+  margin: 3px;
+}
+
+ul.li {
+  border-bottom: 1px solid #ebecee;
 }
 
 .search-icon {

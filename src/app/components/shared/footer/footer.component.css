@@ -1,0 +1,14 @@
+.footer-container {
+    bottom: 0;
+    padding: 0px 10px;
+    display: flex;
+    justify-content: space-between;
+    position: sticky;
+    z-index: 2;
+    color: #157bb1;
+    align-self: center;
+    background: #f8f9fa;
+    border-top: 1px solid #9f9f9f;
+    text-align: center;
+}
+

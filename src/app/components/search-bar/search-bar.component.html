@@ -1,25 +1,25 @@
 <div class="search-container">
   <div class="search-input-wrapper">
     <div class="input-container">
-      <input
-        type="text"
-        [(ngModel)]="searchTerm"
-        placeholder="Search videos..."
-        (keydown.enter)="onSearch()"
-        class="search-input"
-      />
-      <button
-        *ngIf="searchTerm"
-        (click)="clearSearch()"
-        class="clear-button"
-        title="Clear search"
-      >
+      <input type="text" [formControl]="searchControl" [placeholder]="'SEARCH_PLACEHOLDER' | translate"
+        (keydown.enter)="onSearch()" class="search-input" />
+
+      <!-- Suggestions Dropdown -->
+      <ul *ngIf="suggestions.length > 0"
+        class="absolute bg-white border w-full mt-1 rounded shadow max-h-60 overflow-y-auto z-10">
+        <li *ngFor="let suggestion of suggestions" (click)="fillFromSuggestion(suggestion.term)">
+          {{ suggestion.term }}
+        </li>
+      </ul>
+
+      <!-- Clear Button -->
+      <button *ngIf="searchTerm()" (click)="clearSearch()" class="clear-button" title="Clear search">
         ✕
       </button>
     </div>
     <button (click)="onSearch()" class="search-button">
       <img src="assets/search-icon.svg" alt="Search" class="search-icon">
-      Search
+      {{"SEARCH_BUTTON"|translate}}
     </button>
   </div>
 </div>
