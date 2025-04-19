@@ -73,7 +73,7 @@ export class VideoListComponent implements OnInit {
   }
 
   ngOnInit() {
-    // this.testRxjsOperators();
+    this.testRxjsOperators();
     if (this.searchTerm) {
       this.loadVideos();
     }
