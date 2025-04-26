@@ -1,15 +1,36 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SearchBarComponent } from './search-bar.component';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
+import { TranslateModule } from '@ngx-translate/core';
+import { SearchHistoryDB } from '../../services/search-history-db.service';
+import { SharedService } from '../../services/shared.service';
 
 describe('SearchBarComponent', () => {
   let component: SearchBarComponent;
   let fixture: ComponentFixture<SearchBarComponent>;
+  let searchHistoryDBMock: jasmine.SpyObj<SearchHistoryDB>;
+  let sharedServiceMock: jasmine.SpyObj<SharedService>;
 
   beforeEach(async () => {
+    searchHistoryDBMock = jasmine.createSpyObj('SearchHistoryDB', [
+      'searchSuggestions',
+      'addSearchTerm',
+    ]);
+    searchHistoryDBMock.searchSuggestions.and.returnValue(Promise.resolve([]));
+
+    sharedServiceMock = jasmine.createSpyObj('SharedService', ['updateValue']);
+
     await TestBed.configureTestingModule({
-      imports: [SearchBarComponent, FormsModule]
+      imports: [
+        SearchBarComponent,
+        ReactiveFormsModule,
+        TranslateModule.forRoot(),
+      ],
+      providers: [
+        { provide: SearchHistoryDB, useValue: searchHistoryDBMock },
+        { provide: SharedService, useValue: sharedServiceMock },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(SearchBarComponent);
@@ -23,7 +44,7 @@ describe('SearchBarComponent', () => {
 
   it('should emit search event when search button is clicked', () => {
     spyOn(component.search, 'emit');
-    component.searchTerm = 'Angular';
+    component.searchControl.setValue('Angular');
     fixture.detectChanges();
 
     const button = fixture.debugElement.query(By.css('.search-button'));
@@ -34,7 +55,7 @@ describe('SearchBarComponent', () => {
 
   it('should emit search event when enter key is pressed', () => {
     spyOn(component.search, 'emit');
-    component.searchTerm = 'Angular';
+    component.searchControl.setValue('Angular');
     fixture.detectChanges();
 
     const input = fixture.debugElement.query(By.css('.search-input'));
@@ -46,19 +67,19 @@ describe('SearchBarComponent', () => {
 
   it('should clear search term when clear button is clicked', () => {
     spyOn(component.search, 'emit');
-    component.searchTerm = 'Angular';
+    component.searchControl.setValue('Angular');
     fixture.detectChanges();
 
     const clearButton = fixture.debugElement.query(By.css('.clear-button'));
     expect(clearButton).toBeTruthy();
     clearButton.nativeElement.click();
 
-    expect(component.searchTerm).toBe('');
+    expect(component.searchControl.value).toBe('');
     expect(component.search.emit).toHaveBeenCalledWith('');
   });
 
   it('should not show clear button when search term is empty', () => {
-    component.searchTerm = '';
+    component.searchControl.setValue('');
     fixture.detectChanges();
 
     const clearButton = fixture.debugElement.query(By.css('.clear-button'));
@@ -66,7 +87,7 @@ describe('SearchBarComponent', () => {
   });
 
   it('should show clear button when search term is not empty', () => {
-    component.searchTerm = 'Angular';
+    component.searchControl.setValue('Angular');
     fixture.detectChanges();
 
     const clearButton = fixture.debugElement.query(By.css('.clear-button'));

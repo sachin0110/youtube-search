@@ -1,36 +1,48 @@
-import {
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  tick,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import { SearchBarComponent } from './components/search-bar/search-bar.component';
-import { VideoListComponent } from './components/video-list/video-list.component';
-import { YoutubeApiService } from './services/youtube-api.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { of, throwError } from 'rxjs';
+import { RouterTestingModule } from '@angular/router/testing';
 import { By } from '@angular/platform-browser';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { Location } from '@angular/common';
+
+// Mock components for testing router outlet
+@Component({
+  selector: 'app-mock-login',
+  standalone: true,
+  template: '<div>Mock Login</div>',
+})
+export class MockLoginComponent {}
+
+@Component({
+  selector: 'app-mock-dashboard',
+  standalone: true,
+  template: '<div>Mock Dashboard</div>',
+})
+export class MockDashboardComponent {}
 
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
-  let youtubeServiceSpy: jasmine.SpyObj<YoutubeApiService>;
+  let router: Router;
+  let location: Location;
 
   beforeEach(async () => {
-    youtubeServiceSpy = jasmine.createSpyObj('YoutubeApiService', [
-      'searchVideos',
-    ]);
-
     await TestBed.configureTestingModule({
       imports: [
+        AppComponent,
         HttpClientTestingModule,
-        SearchBarComponent,
-        VideoListComponent,
+        RouterTestingModule.withRoutes([
+          { path: 'login', component: MockLoginComponent },
+          { path: 'dashboard', component: MockDashboardComponent },
+          { path: '', redirectTo: 'login', pathMatch: 'full' },
+        ]),
       ],
-      providers: [{ provide: YoutubeApiService, useValue: youtubeServiceSpy }],
     }).compileComponents();
 
+    router = TestBed.inject(Router);
+    location = TestBed.inject(Location);
     fixture = TestBed.createComponent(AppComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -40,74 +52,14 @@ describe('AppComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should update searchTerm when searchVideos is called', () => {
-    const searchTerm = 'Angular';
-    youtubeServiceSpy.searchVideos.and.returnValue(
-      of({ items: [], nextPageToken: '' })
-    );
-
-    component.searchVideos(searchTerm);
-
-    expect(component.searchTerm).toBe(searchTerm);
+  it('should have a router outlet', () => {
+    const routerOutlet = fixture.debugElement.query(By.css('router-outlet'));
+    expect(routerOutlet).toBeTruthy();
   });
 
-  it('should call YoutubeApiService when searching for videos', () => {
-    const searchTerm = 'Angular';
-    youtubeServiceSpy.searchVideos.and.returnValue(
-      of({ items: [], nextPageToken: '' })
-    );
-
-    component.searchVideos(searchTerm);
-
-    expect(youtubeServiceSpy.searchVideos).toHaveBeenCalledWith(searchTerm, '');
-  });
-
-  it('should handle empty search term', () => {
-    const searchTerm = '';
-    youtubeServiceSpy.searchVideos.and.returnValue(
-      of({ items: [], nextPageToken: '' })
-    );
-
-    component.searchVideos(searchTerm);
-
-    expect(component.searchTerm).toBe('');
-    expect(youtubeServiceSpy.searchVideos).toHaveBeenCalledWith('', '');
-  });
-
-  it('should handle search term with special characters', () => {
-    const searchTerm = 'Angular & TypeScript';
-    youtubeServiceSpy.searchVideos.and.returnValue(
-      of({ items: [], nextPageToken: '' })
-    );
-
-    component.searchVideos(searchTerm);
-
-    expect(component.searchTerm).toBe(searchTerm);
-    expect(youtubeServiceSpy.searchVideos).toHaveBeenCalledWith(searchTerm, '');
-  });
-
-  it('should handle service errors', fakeAsync(() => {
-    const searchTerm = 'Angular';
-    const error = new Error('API Error');
-    youtubeServiceSpy.searchVideos.and.returnValue(throwError(() => error));
-
-    component.searchVideos(searchTerm);
-    tick();
-
-    expect(component.searchTerm).toBe(searchTerm);
-  }));
-
-  it('should render search bar component', () => {
-    const searchBar = fixture.debugElement.query(
-      By.directive(SearchBarComponent)
-    );
-    expect(searchBar).toBeTruthy();
-  });
-
-  it('should render video list component', () => {
-    const videoList = fixture.debugElement.query(
-      By.directive(VideoListComponent)
-    );
-    expect(videoList).toBeTruthy();
+  it('should navigate to login by default', async () => {
+    await router.navigate(['']);
+    fixture.detectChanges();
+    expect(location.path()).toBe('/login');
   });
 });

@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { SearchHistoryDbService } from './search-history-db.service';
+import { SearchHistoryDB } from './search-history-db.service';
 
 describe('SearchHistoryDbService', () => {
-  let service: SearchHistoryDbService;
+  let service: SearchHistoryDB;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(SearchHistoryDbService);
+    service = TestBed.inject(SearchHistoryDB);
   });
 
   it('should be created', () => {

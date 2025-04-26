@@ -1,8 +1,8 @@
-import { CustomDatePipe } from './custom-date.pipe';
+import { DateCustomPipe } from './custom-date.pipe';
 
-describe('CustomDatePipe', () => {
+describe('DateCustomPipe', () => {
   it('create an instance', () => {
-    const pipe = new CustomDatePipe();
+    const pipe = new DateCustomPipe();
     expect(pipe).toBeTruthy();
   });
 });
